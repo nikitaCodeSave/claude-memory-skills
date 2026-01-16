@@ -1,0 +1,42 @@
+{
+  "$schema": "./schemas/progress.schema.json",
+  "version": "1.0.0",
+  "session": {
+    "id": "",
+    "startedAt": "",
+    "lastActivity": "2026-01-16T22:24:42.972039",
+    "goal": ""
+  },
+  "track": {
+    "name": "",
+    "description": "",
+    "startedAt": "",
+    "targetCompletion": "",
+    "status": "active"
+  },
+  "currentTask": {
+    "id": "",
+    "title": "",
+    "startedAt": "",
+    "notes": [],
+    "blockers": []
+  },
+  "completedInSession": [],
+  "workLog": [
+    {
+      "timestamp": "",
+      "action": "",
+      "details": "",
+      "outcome": ""
+    },
+    {
+      "timestamp": "2026-01-16T22:24:42.897020",
+      "action": "auto-save (precompact)",
+      "details": "Автосохранение по событию: precompact",
+      "outcome": "saved"
+    }
+  ],
+  "insights": [],
+  "nextSteps": [],
+  "handoffNotes": ""
+}

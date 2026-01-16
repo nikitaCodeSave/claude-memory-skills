@@ -1,0 +1,22 @@
+{
+  "name": "simple-skill-creation",
+  "description": "Тест создания простого однофайлового навыка",
+  "skills": ["skill-creator"],
+  "query": "Создай простой навык для генерации git commit сообщений. Навык должен анализировать staged изменения и предлагать conventional commit формат.",
+  "expected_behavior": [
+    "Создаёт директорию .claude/skills/commit-helper/",
+    "Создаёт файл SKILL.md с валидным YAML frontmatter",
+    "name содержит только lowercase и дефисы",
+    "description включает триггерные слова на русском и английском",
+    "allowed-tools ограничены git командами и Read",
+    "Содержит инструкции по conventional commit формату",
+    "Проходит автоматическую валидацию hooks"
+  ],
+  "validation_criteria": {
+    "file_exists": ".claude/skills/commit-helper/SKILL.md",
+    "frontmatter_valid": true,
+    "name_format": "^[a-z0-9-]+$",
+    "description_min_length": 50,
+    "triggers_present": ["коммит", "commit", "git"]
+  }
+}

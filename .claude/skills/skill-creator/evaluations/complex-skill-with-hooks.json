@@ -1,0 +1,27 @@
+{
+  "name": "complex-skill-with-hooks",
+  "description": "Тест создания навыка с hooks и валидацией",
+  "skills": ["skill-creator"],
+  "query": "Создай навык для ревью безопасности кода. Навык должен использовать PreToolUse hooks для проверки файлов на секреты перед чтением, и PostToolUse для логирования просканированных файлов.",
+  "expected_behavior": [
+    "Создаёт директорию .claude/skills/security-review/",
+    "Создаёт SKILL.md с hooks конфигурацией",
+    "Создаёт scripts/ директорию со скриптами валидации",
+    "PreToolUse hook настроен на matcher 'Read'",
+    "PostToolUse hook настроен на matcher 'Grep'",
+    "Скрипты имеют исполняемые права (chmod +x)",
+    "description включает security-related триггеры",
+    "Содержит чеклист OWASP Top 10"
+  ],
+  "validation_criteria": {
+    "files_exist": [
+      ".claude/skills/security-review/SKILL.md",
+      ".claude/skills/security-review/scripts/"
+    ],
+    "hooks_configured": {
+      "PreToolUse": true,
+      "PostToolUse": true
+    },
+    "scripts_executable": true
+  }
+}

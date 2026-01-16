@@ -1,0 +1,28 @@
+{
+  "name": "multi-file-skill",
+  "description": "Тест создания многофайлового навыка с progressive disclosure",
+  "skills": ["skill-creator"],
+  "query": "Создай навык для обработки PDF документов. Навык должен поддерживать извлечение текста, заполнение форм и объединение PDF. Используй context: fork и включи reference документацию в отдельных файлах.",
+  "expected_behavior": [
+    "Создаёт директорию .claude/skills/pdf-processing/",
+    "Создаёт SKILL.md < 500 строк (основной overview)",
+    "Создаёт REFERENCE.md с детальной документацией API",
+    "Создаёт scripts/ с Python утилитами",
+    "context: fork настроен для изолированного выполнения",
+    "agent: general-purpose для полного доступа",
+    "SKILL.md содержит ссылки на reference файлы",
+    "Ссылки на один уровень глубины от SKILL.md",
+    "description включает PDF-related триггеры"
+  ],
+  "validation_criteria": {
+    "files_exist": [
+      ".claude/skills/pdf-processing/SKILL.md",
+      ".claude/skills/pdf-processing/REFERENCE.md",
+      ".claude/skills/pdf-processing/scripts/"
+    ],
+    "context_fork": true,
+    "progressive_disclosure": true,
+    "skill_md_lines": {"max": 500},
+    "references_depth": 1
+  }
+}
