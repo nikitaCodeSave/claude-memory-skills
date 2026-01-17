@@ -8,6 +8,12 @@
   "log": [
     {
       "date": "2026-01-17",
+      "type": "decision",
+      "text": "Переход на единый memory.json вместо 7 MD файлов",
+      "reason": "Упрощение, стабильный парсинг JSON для Claude"
+    },
+    {
+      "date": "2026-01-17",
       "type": "task",
       "text": "Анализ SKILL.md на соответствие best practices"
     },
