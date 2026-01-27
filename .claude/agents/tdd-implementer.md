@@ -1,6 +1,6 @@
 ---
 name: tdd-implementer
-description: Написание минимального кода для прохождения тестов. Использовать для GREEN фазы TDD.
+description: Пишет минимальный код для прохождения падающих тестов. Используй в GREEN фазе TDD после написания тестов.
 model: inherit
 permissionMode: dontAsk
 disallowedTools:

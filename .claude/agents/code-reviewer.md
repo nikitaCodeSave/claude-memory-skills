@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Проверка качества кода после TDD цикла. Security, coverage, best practices.
+description: Проактивно проверяет качество кода после TDD цикла. Используй для ревью security, coverage >= 80%, best practices перед коммитом.
 model: inherit
 permissionMode: plan
 disallowedTools:

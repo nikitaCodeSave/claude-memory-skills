@@ -1,6 +1,6 @@
 ---
 name: tdd-refactorer
-description: Улучшение качества кода при сохранении зелёных тестов. Использовать для REFACTOR фазы TDD.
+description: Улучшает качество кода при сохранении зелёных тестов. Используй в REFACTOR фазе TDD после прохождения всех тестов.
 model: inherit
 permissionMode: dontAsk
 disallowedTools:
