@@ -32,3 +32,4 @@ logs/
 
 # Session-specific memory (optional - uncomment if needed)
 # memory-bank/progress.json
+.coverage
