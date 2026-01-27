@@ -1,13 +1,70 @@
 {
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write(*.py)|Edit(*.py)|MultiEdit(*.py)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && ruff format --quiet \"$CLAUDE_FILE_PATHS\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && ruff check --quiet \"$CLAUDE_FILE_PATHS\" 2>&1 | head -10 || true"
+          },
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && pytest tests/ -x --tb=line -q 2>&1 | head -20",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '^git commit'; then cd \"$CLAUDE_PROJECT_DIR\" && pytest tests/ -q --tb=no || (echo 'Tests failing. Fix before commit.' >&2 && exit 2); fi",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '^git commit'; then cd \"$CLAUDE_PROJECT_DIR\" && pytest --cov=src --cov-fail-under=80 --cov-report=term-missing:skip-covered -q 2>&1 | tail -5 || (echo 'Coverage below 80%. Add more tests.' >&2 && exit 2); fi",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && grep -rn 'print(\\|breakpoint()' src/ 2>/dev/null | head -3 && echo '⚠️  Debug statements found in src/' || true"
+          }
+        ]
+      }
+    ]
   },
   "permissions": {
     "allow": [
-      "Read(memory-bank/**)",
-      "Write(memory-bank/**)",
-      "Edit(memory-bank/**)",
-      "Bash(python3 *memory-hook.py*)",
-      "Bash(mkdir *memory-bank/archive*)"
+      "Bash(pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "MultiEdit"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

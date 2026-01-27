@@ -1,0 +1,73 @@
+{
+  "version": "1.0",
+  "patterns": [
+    {
+      "id": "pat-001",
+      "name": "test_happy_path",
+      "description": "Normal operation with valid input",
+      "template": "def test_{function}_returns_{expected}_with_{input_type}():\n    result = {function}({input})\n    assert result == {expected}",
+      "used_in_features": ["string_utils", "calculator"],
+      "required": true,
+      "priority": "must"
+    },
+    {
+      "id": "pat-002",
+      "name": "test_empty_input",
+      "description": "Handle empty string/list/dict gracefully",
+      "template": "def test_{function}_handles_empty_input():\n    result = {function}('')\n    assert result == {expected_empty}",
+      "used_in_features": ["string_utils"],
+      "required": true,
+      "priority": "must",
+      "notes": "Always test empty input for string functions"
+    },
+    {
+      "id": "pat-003",
+      "name": "test_none_raises_error",
+      "description": "None input raises TypeError",
+      "template": "def test_{function}_raises_on_none():\n    with pytest.raises(TypeError):\n        {function}(None)",
+      "used_in_features": ["string_utils", "calculator"],
+      "required": true,
+      "priority": "must",
+      "notes": "Per dec-001: use TypeError for type mismatches"
+    },
+    {
+      "id": "pat-004",
+      "name": "test_unicode_handling",
+      "description": "Handle unicode characters correctly",
+      "template": "def test_{function}_handles_unicode():\n    result = {function}('hello 世界')\n    # verify unicode preserved",
+      "used_in_features": ["string_utils"],
+      "required": false,
+      "priority": "should",
+      "notes": "Essential for internationalization"
+    },
+    {
+      "id": "pat-005",
+      "name": "test_type_error_non_string",
+      "description": "Non-string input raises TypeError",
+      "template": "def test_{function}_raises_on_non_string():\n    with pytest.raises(TypeError):\n        {function}(123)",
+      "used_in_features": ["string_utils"],
+      "required": true,
+      "priority": "must"
+    },
+    {
+      "id": "pat-006",
+      "name": "test_boundary_values",
+      "description": "Test min/max/boundary values",
+      "template": "def test_{function}_handles_boundary_{boundary}():\n    result = {function}({boundary_value})\n    assert result == {expected}",
+      "used_in_features": ["calculator", "string_utils"],
+      "required": true,
+      "priority": "must",
+      "notes": "Single char, very long strings, max int, etc."
+    },
+    {
+      "id": "pat-007",
+      "name": "test_division_by_zero",
+      "description": "Division by zero raises ZeroDivisionError",
+      "template": "def test_divide_raises_on_zero_divisor():\n    with pytest.raises(ZeroDivisionError):\n        divide(10, 0)",
+      "used_in_features": ["calculator"],
+      "required": true,
+      "priority": "must",
+      "notes": "Per dec-003"
+    }
+  ]
+}

@@ -2,51 +2,85 @@
 
 Production-ready конфигурация `.claude/` для строгого Test-Driven Development в Python проектах.
 
-Эволюционировала из 10+ месяцев интенсивной ежедневной работы с Claude Code.
-
 ## Ключевые особенности
 
-- **Строгий TDD** — тесты ДО кода, coverage >= 80% enforcement
+- **5-фазный TDD** — ANALYSIS → RED → GREEN → REFACTOR → VERIFY
+- **Tasks API** — отслеживание прогресса с dependency enforcement
+- **Memory Bank** — долгосрочная память для patterns, decisions, requirements
 - **Изоляция контекста** — каждая фаза TDD в изолированном субагенте
 - **Автоматизация** — hooks для auto-format, lint, тестов после каждого изменения
-- **Quality Gates** — блокировка коммита при падающих тестах или низком coverage
-- **Verification Loop** — 6-фазная проверка перед PR
+- **Quality Gates** — блокировка коммита при падающих тестах или coverage < 80%
 
-## Что внутри
+## Архитектура: Два уровня памяти
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ДВУХУРОВНЕВАЯ СИСТЕМА ПАМЯТИ                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  УРОВЕНЬ 1: SESSION MEMORY (Tasks API)                          │
+│  - Активные TDD pipelines (in-progress features)                │
+│  - Dependency enforcement (blockedBy)                           │
+│  - ~20k tokens на pipeline, persist через compaction            │
+│  - Очистка через /tdd-cleanup                                   │
+│                                                                 │
+│  УРОВЕНЬ 2: LONG-TERM MEMORY (JSON Memory Bank)                 │
+│  - Git-tracked, persist навсегда                                │
+│  - feature-backlog.json — запланированные фичи                  │
+│  - feature-completed.json — архив завершённых                   │
+│  - decisions.json — design decisions                            │
+│  - test-patterns.json — многоразовые паттерны                   │
+│  - requirements/ — спецификации требований                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Структура проекта
 
 ```
 project/
 ├── .claude/                          # Claude Code конфигурация
-│   ├── CLAUDE.md                     # Проектные правила и enforcement
+│   ├── CLAUDE.md                     # Проектные правила
 │   ├── settings.json                 # Hooks и permissions
 │   │
+│   ├── memory/                       # Long-term Memory Bank
+│   │   ├── feature-backlog.json     # Очередь фич
+│   │   ├── feature-completed.json   # Архив завершённых
+│   │   ├── decisions.json           # Design decisions
+│   │   ├── test-patterns.json       # Паттерны тестов
+│   │   └── requirements/            # Requirements specs
+│   │
 │   ├── agents/                       # Специализированные субагенты
+│   │   ├── requirements-analyst.md  # ⬜ ANALYSIS: requirements
 │   │   ├── tdd-test-writer.md       # 🔴 RED: падающие тесты
 │   │   ├── tdd-implementer.md       # 🟢 GREEN: минимальная реализация
 │   │   ├── tdd-refactorer.md        # 🔵 REFACTOR: улучшение кода
 │   │   └── code-reviewer.md         # 📋 REVIEW: quality gates
 │   │
 │   ├── commands/                     # Slash-команды
+│   │   ├── tdd-analyze.md           # /tdd-analyze
 │   │   ├── tdd-red.md               # /tdd-red <feature>
 │   │   ├── tdd-green.md             # /tdd-green
 │   │   ├── tdd-refactor.md          # /tdd-refactor
-│   │   ├── checkpoint.md            # /checkpoint
-│   │   └── verify.md                # /verify
+│   │   ├── verify.md                # /verify
+│   │   ├── tdd-status.md            # /tdd-status
+│   │   ├── tdd-cleanup.md           # /tdd-cleanup
+│   │   └── checkpoint.md            # /checkpoint
 │   │
 │   ├── skills/                       # Workflow definitions
-│   │   ├── tdd/SKILL.md             # TDD pipeline orchestrator
-│   │   ├── tdd-pipeline/SKILL.md    # Task tracking
-│   │   └── verification-loop/SKILL.md # 6-phase verification
+│   │   └── tdd/SKILL.md             # TDD pipeline orchestrator
 │   │
-│   └── rules/                        # Обязательные правила
-│       ├── testing.md               # Coverage 80%, TDD antipatterns
-│       ├── coding-style.md          # Лимиты размеров, type hints
-│       └── agents.md                # Правила делегирования агентам
+│   ├── rules/                        # Обязательные правила
+│   │   ├── testing.md               # Coverage 80%, TDD antipatterns
+│   │   ├── coding-style.md          # Лимиты размеров, type hints
+│   │   ├── agents.md                # Правила делегирования
+│   │   └── memory.md                # Работа с Memory Bank
+│   │
+│   └── scripts/
+│       └── update-memory.py         # Auto-update Memory Bank
 │
-├── src/                              # Production код (динамический)
-├── tests/                            # Тесты (динамический)
-├── conftest.py                       # Shared fixtures
-└── pyproject.toml                    # Конфигурация проекта
+├── src/                              # Production код
+└── tests/                            # Тесты
 ```
 
 ## Быстрый старт
@@ -61,65 +95,140 @@ cp -r .claude/ /path/to/your/project/
 pip install pytest pytest-cov ruff
 ```
 
-### TDD Workflow
+### 5-фазный TDD Workflow
 
 ```bash
-# Полный цикл для новой фичи
-/tdd-red user authentication with JWT
+# 1. Создать pipeline с 5 задачами
+/tdd user authentication
+
+# 2. Определить requirements (ОБЯЗАТЕЛЬНО!)
+/tdd-analyze
+
+# 3. Написать падающие тесты
+/tdd-red
+
+# 4. Минимальная реализация
 /tdd-green
+
+# 5. Улучшить код
 /tdd-refactor
+
+# 6. Верификация перед коммитом
 /verify
+
+# 7. Коммит (hooks проверят tests + coverage)
 git commit
 ```
 
-### Альтернатива: автоматический pipeline
+### Управление pipelines
 
 ```bash
-/tdd user authentication with JWT
+# Статус всех pipelines и Memory Bank
+/tdd-status
+
+# Архивировать завершённые (освободить tokens)
+/tdd-cleanup
 ```
 
-Создаёт задачи с зависимостями и ведёт через весь цикл.
+## Команды
 
-### Auto-trigger (проактивный TDD)
+| Команда | Фаза | Описание |
+|---------|------|----------|
+| `/tdd <feature>` | — | Создать 5-фазный pipeline |
+| `/tdd-analyze` | ANALYSIS | Определить requirements |
+| `/tdd-red` | RED | Написать падающие тесты |
+| `/tdd-green` | GREEN | Минимальная реализация |
+| `/tdd-refactor` | REFACTOR | Улучшить код |
+| `/verify` | VERIFY | 6-фазная проверка |
+| `/tdd-status` | — | Статус pipelines |
+| `/tdd-cleanup` | — | Архивировать завершённые |
+| `/checkpoint` | — | Human review point |
 
-TDD workflow автоматически активируется на фразы:
-- EN: `implement`, `add feature`, `build`, `create`, `develop`, `new feature`
-- RU: `реализовать`, `добавить фичу`, `создать`, `разработать`, `новая фича`
+## Агенты
 
-## Ключевые концепции
+| Агент | Фаза | Роль |
+|-------|------|------|
+| `requirements-analyst` | ANALYSIS | Определение acceptance criteria |
+| `tdd-test-writer` | RED | Пишет падающие тесты |
+| `tdd-implementer` | GREEN | Минимальная реализация |
+| `tdd-refactorer` | REFACTOR | Улучшает код |
+| `code-reviewer` | REVIEW | Quality gates |
 
-### Агенты
+**Изоляция контекста:** каждый агент работает в изолированном 200k контексте и не видит работу других агентов.
 
-| Агент | Роль | Когда использовать |
-|-------|------|-------------------|
-| `tdd-test-writer` | Пишет падающие тесты | RED фаза |
-| `tdd-implementer` | Минимальная реализация | GREEN фаза |
-| `tdd-refactorer` | Улучшает код | REFACTOR фаза |
-| `code-reviewer` | Quality gates | После TDD цикла |
+## Memory Bank
 
-### Hooks (автоматизация)
+### Структура
 
-**PostToolUse** — после каждого Write/Edit .py файла:
-- Auto-format (ruff format)
-- Lint check (ruff check)
-- Тесты (pytest)
+```
+.claude/memory/
+├── feature-backlog.json      # Запланированные фичи с приоритетами
+├── feature-completed.json    # Архив: coverage, commits, lessons learned
+├── decisions.json            # Design decisions с reasoning
+├── test-patterns.json        # Многоразовые паттерны тестов
+└── requirements/             # Requirements Specifications
+    └── feat-XXX.json         # AC-001, AC-002... для каждой фичи
+```
 
-**PreToolUse** — перед git commit:
-- Проверка что все тесты проходят
-- Проверка coverage >= 80%
+### Использование
 
-**Stop** — после каждого ответа Claude:
-- Сканирование debug statements (print, breakpoint)
+- При `/tdd` проверяется Memory Bank на похожие фичи
+- `/tdd-analyze` создаёт requirements spec с acceptance criteria
+- `/verify` архивирует в feature-completed.json
+- `/tdd-cleanup` удаляет Tasks, но память остаётся
 
-### Rules (enforcement)
+### Requirements Specification
+
+```json
+{
+  "feature_id": "feat-003",
+  "feature_name": "email_validation",
+  "user_story": {
+    "role": "user",
+    "action": "validate email addresses",
+    "benefit": "prevent invalid registrations"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Valid email passes", "priority": "must"},
+    {"id": "AC-002", "description": "Invalid format rejected", "priority": "must"}
+  ],
+  "edge_cases": ["Empty input", "None input", "Very long email"],
+  "out_of_scope": ["DNS MX verification"],
+  "technical_constraints": ["No external HTTP calls"]
+}
+```
+
+## Hooks (автоматизация)
+
+### PostToolUse — после изменения .py файлов
+
+```
+ruff format → ruff check → pytest
+```
+
+### PreToolUse — перед git commit
+
+```
+pytest (все тесты должны пройти)
+pytest --cov --cov-fail-under=80 (coverage >= 80%)
+```
+
+### Stop — после каждого ответа Claude
+
+```
+Сканирование print()/breakpoint() в src/
+```
+
+## Правила (enforcement)
 
 | Файл | Содержимое |
 |------|------------|
 | `rules/testing.md` | Coverage 80%, TDD antipatterns, quality checklist |
 | `rules/coding-style.md` | Лимиты размеров, type hints, docstrings |
 | `rules/agents.md` | Когда какой агент, изоляция контекста |
+| `rules/memory.md` | Работа с Memory Bank |
 
-### Code Style Limits
+### Лимиты кода
 
 | Метрика | Лимит |
 |---------|-------|
@@ -128,152 +237,66 @@ TDD workflow автоматически активируется на фразы
 | Длина строки | 100 символов |
 | Глубина вложенности | 4 уровня |
 
-### TDD Antipatterns (избегать)
-
-| Антипаттерн | Решение |
-|-------------|---------|
-| Testing Implementation Details | Тестируй поведение, не структуру |
-| Skipping Red Phase | Всегда убедись что тест падает |
-| Brittle Tests | Избегай over-mocking |
-| Test Interdependence | Каждый тест независим |
-
-### Verification Loop
+## Verification Loop
 
 6-фазная проверка перед PR:
 
 ```
 1. Lint      → ruff check
 2. Format    → ruff format --check
-3. Types     → mypy/pyright (если есть)
-4. Tests     → pytest + coverage
-5. Security  → поиск secrets, debug statements
-6. Diff      → review изменённых файлов
+3. Tests     → pytest + coverage
+4. Security  → поиск secrets, debug statements
+5. Diff      → review изменённых файлов
+6. AC Check  → все acceptance criteria покрыты тестами
 ```
 
-Запуск: `/verify`
+## Трассировка Requirements → Tests
 
-## Интерактивные checkpoints
+Каждый acceptance criterion должен иметь тест:
 
-После каждой фазы TDD доступен выбор:
+```python
+class TestEmailValidation:
+    """Tests for email_validation (feat-003)"""
 
-```
-[1] ✅ APPROVE — продолжить к следующей фазе
-[2] 🔄 REVISE — внести изменения
-[3] 📝 EXPLAIN — объяснить код/тесты
-[4] 🔍 REVIEW — показать файлы
-[5] ⏪ ROLLBACK — откатить
-[6] ❌ ABORT — прервать workflow
-```
+    # AC-001: Valid email passes
+    def test_valid_email_passes(self):
+        """AC-001: valid email format accepted"""
+        assert validate_email("user@example.com") is True
 
-## Настройка под проект
-
-### settings.json
-
-Отредактируй hooks под свой стек:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "Write(*.py)|Edit(*.py)",
-      "hooks": [{
-        "type": "command",
-        "command": "your-test-command",
-        "timeout": 120
-      }]
-    }]
-  }
-}
+    # AC-002: Invalid format rejected
+    def test_invalid_format_raises(self):
+        """AC-002: invalid format raises ValidationError"""
+        with pytest.raises(ValidationError):
+            validate_email("not-an-email")
 ```
 
-### CLAUDE.md
+## Параллельные pipelines
 
-Добавь специфичные правила:
-
-```markdown
-## Project-specific
-
-- FastAPI для API
-- SQLAlchemy ORM
-- Alembic migrations
-```
-
-### rules/testing.md
-
-Настрой coverage threshold:
-
-```markdown
-# Измени если нужен другой порог
-pytest --cov=src --cov-fail-under=90
-```
-
-## Зависимости
+Можно работать над несколькими фичами одновременно:
 
 ```bash
-pip install pytest pytest-cov ruff mypy
-```
+/tdd email_validation
+/tdd password_validator
 
-## User Story Format
-
-Структурируй требования перед началом TDD:
-
-```
-As a [role], I want to [action], so that [benefit]
-
-Пример:
-As a user, I want to validate my email, so that I receive confirmation
+# Каждый pipeline независим
+# /tdd-status покажет оба
 ```
 
 ## Принципы
 
-1. **Test-First** — никакого кода до теста
-2. **Изоляция** — test-writer не знает реализацию
-3. **Минимализм** — только код для прохождения тестов
-4. **Не меняй тесты** — fix code, not tests
-5. **Human review** — checkpoints между фазами
-6. **Enforcement** — правила не рекомендации, а требования
+1. **Analysis-First** — сначала requirements, потом тесты
+2. **Test-First** — никакого кода до теста
+3. **Изоляция** — каждая фаза в отдельном контексте
+4. **Минимализм** — только код для прохождения тестов
+5. **Не меняй тесты** — fix code, not tests
+6. **Memory Bank** — учись на прошлых фичах
+7. **Enforcement** — правила не рекомендации, а требования
 
-## Почему субагенты?
+## Зависимости
 
-Каждая фаза TDD выполняется в изолированном контексте:
-
-- **tdd-test-writer** — не знает как будет написан код
-- **tdd-implementer** — видит только тесты, не рассуждения
-- **tdd-refactorer** — улучшает не зная "почему так написано"
-
-Это предотвращает "утечку контекста" между фазами.
-
-## Полный workflow
-
+```bash
+pip install pytest pytest-cov ruff
 ```
-/tdd-red <feature>
-    ↓
-  Тесты ПАДАЮТ ✓
-    ↓
-/tdd-green
-    ↓
-  Тесты ПРОХОДЯТ ✓
-    ↓
-/tdd-refactor
-    ↓
-  Код улучшен, тесты ПРОХОДЯТ ✓
-    ↓
-/verify
-    ↓
-  6 фаз пройдены ✓
-    ↓
-git commit
-    ↓
-  Hooks проверяют tests + coverage ✓
-```
-
-## Важные заметки
-
-- **Context management**: Субагенты имеют свои 200k токенов контекста
-- **Coverage enforcement**: Коммит заблокирован при coverage < 80%
-- **Auto-testing**: Тесты запускаются автоматически после каждого изменения .py
-
----
 
 ## License
 

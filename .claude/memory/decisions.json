@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "decisions": [
+    {
+      "id": "dec-001",
+      "date": "2025-01-24",
+      "feature": "string_utils",
+      "topic": "Error Handling Strategy",
+      "decision": "Use TypeError for type mismatches, ValueError for invalid values",
+      "alternatives_considered": [
+        {"option": "Custom ValidationError", "rejected_because": "Overkill for simple utils"},
+        {"option": "Return None", "rejected_because": "Silent failures hide bugs"}
+      ],
+      "reasoning": "Standard Python exceptions are familiar and well-understood",
+      "impact": ["All utility modules should follow this pattern"],
+      "status": "active"
+    },
+    {
+      "id": "dec-002",
+      "date": "2025-01-24",
+      "feature": "string_utils",
+      "topic": "Input Validation",
+      "decision": "Validate input type at function entry, fail fast",
+      "alternatives_considered": [
+        {"option": "Duck typing", "rejected_because": "Unclear error messages"},
+        {"option": "Type coercion", "rejected_because": "Unexpected behavior"}
+      ],
+      "reasoning": "Explicit is better than implicit (Zen of Python)",
+      "impact": ["All public functions validate inputs"],
+      "status": "active"
+    },
+    {
+      "id": "dec-003",
+      "date": "2025-01-26",
+      "feature": "calculator",
+      "topic": "Division by Zero",
+      "decision": "Raise ZeroDivisionError with descriptive message",
+      "alternatives_considered": [
+        {"option": "Return infinity", "rejected_because": "Mathematically imprecise"},
+        {"option": "Return None", "rejected_because": "Silent failure"}
+      ],
+      "reasoning": "Explicit error allows caller to handle appropriately",
+      "impact": ["All arithmetic functions handle edge cases explicitly"],
+      "status": "active"
+    }
+  ]
+}

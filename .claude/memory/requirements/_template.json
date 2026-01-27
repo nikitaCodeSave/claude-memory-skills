@@ -1,0 +1,56 @@
+{
+  "$schema": "Requirements Specification Template",
+  "feature_id": "feat-XXX",
+  "feature_name": "feature_name",
+  "version": "1.0",
+  "created_date": "YYYY-MM-DD",
+  "status": "draft|approved|implemented",
+
+  "user_story": {
+    "role": "user|admin|developer",
+    "action": "what the user wants to do",
+    "benefit": "why they want to do it"
+  },
+
+  "acceptance_criteria": [
+    {
+      "id": "AC-001",
+      "description": "What must be true for this feature to be complete",
+      "examples": ["example input -> expected output"],
+      "priority": "must|should|could"
+    }
+  ],
+
+  "edge_cases": [
+    "Empty input",
+    "None input",
+    "Very long input",
+    "Unicode characters",
+    "Special characters"
+  ],
+
+  "out_of_scope": [
+    "What this feature explicitly does NOT do"
+  ],
+
+  "dependencies": [
+    {
+      "feature": "dependency_feature_name",
+      "reason": "Why this dependency exists"
+    }
+  ],
+
+  "technical_constraints": [
+    "Must be synchronous",
+    "No external HTTP calls",
+    "Must raise specific exception types"
+  ],
+
+  "open_questions": [
+    {
+      "question": "Unresolved design question",
+      "status": "pending|resolved",
+      "default_assumption": "What we assume if not resolved"
+    }
+  ]
+}

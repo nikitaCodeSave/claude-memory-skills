@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-01-27T10:00:00Z",
+  "features": [
+    {
+      "id": "feat-003",
+      "name": "email_validation",
+      "status": "planned",
+      "priority": 1,
+      "description": "Validate email format according to RFC 5322 basics",
+      "acceptance_criteria": [
+        "Check basic email format (local@domain)",
+        "Validate domain has valid structure",
+        "Handle edge cases (plus addressing, subdomains)"
+      ],
+      "estimated_tests": 15,
+      "dependencies": ["string_utils"],
+      "created_date": "2025-01-27",
+      "notes": "Start with basic validation, extend later"
+    },
+    {
+      "id": "feat-004",
+      "name": "password_validator",
+      "status": "planned",
+      "priority": 2,
+      "description": "Validate password strength requirements",
+      "acceptance_criteria": [
+        "Minimum length check",
+        "Require uppercase and lowercase",
+        "Require digits",
+        "Optional special characters"
+      ],
+      "estimated_tests": 12,
+      "dependencies": [],
+      "created_date": "2025-01-27",
+      "notes": "Configurable strength levels"
+    }
+  ]
+}
