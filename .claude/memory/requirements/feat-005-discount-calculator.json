@@ -1,0 +1,59 @@
+{
+  "feature_id": "feat-005",
+  "feature_name": "discount_calculator",
+  "version": "1.0",
+  "created_date": "2026-01-27",
+  "status": "approved",
+  "user_story": {
+    "role": "e-commerce system",
+    "action": "calculate total discount based on order amount, promo codes, and VIP status",
+    "benefit": "apply consistent discount policy with correct precision and maximum cap"
+  },
+  "acceptance_criteria": [
+    {"id": "AC-001", "description": "Order amount > 1000 RUB gets 5% discount", "priority": "must"},
+    {"id": "AC-002", "description": "Order amount > 5000 RUB gets 10% discount", "priority": "must"},
+    {"id": "AC-003", "description": "Order exactly 1000 or 5000 gets previous tier discount", "priority": "must"},
+    {"id": "AC-004", "description": "Fixed promo code subtracts as percentage of original", "priority": "must"},
+    {"id": "AC-005", "description": "Percentage promo code adds to total discount", "priority": "must"},
+    {"id": "AC-006", "description": "Only one promo code per order", "priority": "must"},
+    {"id": "AC-007", "description": "VIP status adds +5% to total discount", "priority": "must"},
+    {"id": "AC-008", "description": "All discounts calculated from original amount and summed", "priority": "must"},
+    {"id": "AC-009", "description": "Maximum total discount is 30%", "priority": "must"},
+    {"id": "AC-010", "description": "Use Decimal for all calculations", "priority": "must"},
+    {"id": "AC-011", "description": "Round final amount to 2 decimal places", "priority": "must"},
+    {"id": "AC-012", "description": "Negative amount raises ValueError", "priority": "must"},
+    {"id": "AC-013", "description": "None input raises TypeError (per dec-001)", "priority": "must"},
+    {"id": "AC-014", "description": "Return both final amount and discount percentage", "priority": "should"}
+  ],
+  "edge_cases": [
+    "Order amount exactly 0",
+    "Exactly at tier boundaries (1000, 5000)",
+    "Just above boundaries (1000.01, 5000.01)",
+    "Promo exceeding 30% cap",
+    "VIP + max tier + large promo -> cap",
+    "Small order with large fixed promo",
+    "Decimal precision edge cases",
+    "Empty/None promo code",
+    "VIP=False vs not provided"
+  ],
+  "out_of_scope": [
+    "Promo code format validation",
+    "Promo code expiration checking",
+    "Promo code database lookup",
+    "Multiple VIP tiers",
+    "Currency conversion",
+    "Tax calculation"
+  ],
+  "dependencies": [
+    {"feature": "calculator (feat-002)", "reason": "Similar Decimal precision pattern"}
+  ],
+  "technical_constraints": [
+    "Must use Decimal (not float)",
+    "TypeError for None inputs (dec-001)",
+    "ValueError for negative amounts (dec-001)",
+    "Validate input at entry (dec-002)",
+    "No external HTTP calls",
+    "Synchronous only"
+  ],
+  "open_questions": []
+}

@@ -94,6 +94,56 @@
         "test_handles_negative_numbers"
       ],
       "dependent_features": []
+    },
+    {
+      "id": "feat-005",
+      "name": "discount_calculator",
+      "status": "completed",
+      "completion_date": "2026-01-27",
+      "requirements_ref": "requirements/feat-005-discount-calculator.json",
+      "tdd_phases": {
+        "analysis": {
+          "date": "2026-01-27",
+          "agent": "requirements-analyst",
+          "acceptance_criteria_count": 14
+        },
+        "red": {
+          "date": "2026-01-27",
+          "test_count": 43,
+          "agent": "tdd-test-writer"
+        },
+        "green": {
+          "date": "2026-01-27",
+          "agent": "tdd-implementer",
+          "attempts": 1
+        },
+        "refactor": {
+          "date": "2026-01-27",
+          "agent": "tdd-refactorer",
+          "improvements": [
+            "Extracted constants (TIER_THRESHOLD_*, MAX_DISCOUNT)",
+            "Extracted helper functions (_validate, _calculate_tier, _calculate_promo)",
+            "Added frozen=True to dataclasses",
+            "Added Literal type for PromoType"
+          ]
+        }
+      },
+      "final_coverage": 98,
+      "test_files": ["tests/test_discount_calculator.py"],
+      "impl_files": ["src/discount_calculator.py"],
+      "commits": [],
+      "decisions_refs": ["dec-001", "dec-002"],
+      "lessons_learned": [
+        "Full ANALYSIS phase before coding saves rework",
+        "Requirements spec enables precise AC traceability",
+        "Subagent isolation prevents context pollution"
+      ],
+      "reusable_patterns": [
+        "test_tier_boundary_values",
+        "test_discount_cap_enforcement",
+        "test_combined_discounts"
+      ],
+      "dependent_features": []
     }
   ]
 }
